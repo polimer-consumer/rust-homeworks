@@ -9,9 +9,9 @@ fn main() {
                 if let Ok(entry) = path {
                     let name = entry.file_name();
                     if entry.path().is_dir() {
-                        println!("> [ {:?} ]", name)
+                        println!("> [ {} ]", name.to_string_lossy())
                     } else {
-                        println!("> {:?}", name);
+                        println!("> {}", name.to_string_lossy());
                     }
                 }
             }
