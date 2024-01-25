@@ -20,9 +20,19 @@ struct FileOutput {
 
 impl OutputStrategy for FileOutput {
     fn execute(&self, file_list: &[String]) {
-        let mut file = fs::File::create(&self.file_name).unwrap();
+        let mut file = match fs::File::create(&self.file_name) {
+            Ok(file) => file,
+            Err(e) => {
+                eprintln!("Error creating file '{}': {}", &self.file_name, e);
+                return;
+            }
+        };
+
         for file_name in file_list {
-            writeln!(file, "{}", file_name).unwrap();
+            if let Err(e) = writeln!(file, "{}", file_name) {
+                eprintln!("Error writing to file '{}': {}", &self.file_name, e);
+                return;
+            }
         }
     }
 }
@@ -90,8 +100,11 @@ fn main() {
     let mut file_to_find: &str = &default_file_to_find;
     let mut sort_flag = false;
     let mut output_strategy: Box<dyn OutputStrategy> = Box::new(ConsoleOutput);
+    println!("{:?}", args);
+    println!("{}", args.len());
 
     for i in 0..args.len() {
+        println!("{}", args[i]);
         if args[i] == "--find" {
             file_to_find = args.get(i + 1).unwrap_or(&default_file_to_find);
         }
