@@ -22,7 +22,6 @@ impl DirWalker for FileFinder {
                             }
                             if name.to_string_lossy().to_string() == file_to_find {
                                 println!("Found file at: {:?}", cur_path);
-                                return;
                             }
                         } else {
                             self.find(cur_path.to_string_lossy().to_string(), file_to_find.clone())
