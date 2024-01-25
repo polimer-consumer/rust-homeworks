@@ -1,7 +1,7 @@
 use std::{env, fs};
 
 trait DirWalker {
-    fn find(&self, base_path: &str, path: &str, file_to_find: &str, file_list: &mut Vec<String>);
+    fn find(&self, path: &str, file_to_find: &str, file_list: &mut Vec<String>);
     fn print_files(&self, sort_flag: bool, file_list: &mut Vec<String>);
 }
 
@@ -19,25 +19,25 @@ fn bubble_sort(file_list: &mut Vec<String>) {
 }
 
 impl DirWalker for FileFinder {
-    fn find(&self, base_path: &str, path: &str, file_to_find: &str, file_list: &mut Vec<String>) {
+    fn find(&self, path: &str, file_to_find: &str, file_list: &mut Vec<String>) {
         match fs::read_dir(path) {
             Err(_) => eprintln!("Failed to open folder: {}", path),
             Ok(paths) => {
                 for path in paths {
                     if let Ok(entry) = path {
-                        let entry_path = entry.path();
-                        let relative_path = entry_path.strip_prefix(base_path).unwrap_or(&entry_path);
-                        let file_name = relative_path.to_str().unwrap();
+                        let cur_path = entry.path();
+                        let name = entry.file_name();
 
-                        if entry_path.is_file() {
-                            if !file_to_find.is_empty() && file_name == file_to_find {
-                                println!("Found file at: {:?}", entry_path);
-                                return;
+                        if cur_path.is_file() {
+                            if !file_to_find.is_empty(){
+                                if name == file_to_find {
+                                    file_list.push(cur_path.display().to_string());
+                                }
                             } else {
-                                file_list.push(file_name.to_string());
+                                file_list.push(cur_path.display().to_string());
                             }
                         } else {
-                            self.find(base_path, file_name, file_to_find, file_list);
+                            self.find(cur_path.to_str().unwrap(), file_to_find, file_list);
                         }
                     }
                 }
@@ -59,7 +59,7 @@ fn main() {
     let file_finder = FileFinder;
 
     let args: Vec<String> = env::args().collect();
-    let base_path = &args[1];
+    let start_dir = &args[1];
     let mut file_to_find = "";
     let mut sort_flag = false;
     let mut file_list: Vec<String> = Vec::new();
@@ -75,6 +75,6 @@ fn main() {
         }
     }
 
-    file_finder.find(base_path, base_path, file_to_find, &mut file_list);
+    file_finder.find(start_dir, file_to_find, &mut file_list);
     file_finder.print_files(sort_flag, &mut file_list);
 }
