@@ -14,18 +14,17 @@ impl DirWalker for FileFinder {
                 for path in paths {
                     if let Ok(entry) = path {
                         let name = entry.file_name();
-                        let name_str = name.to_string_lossy();
+                        let cur_path = entry.path();
 
-                        if entry.path().is_file() {
+                        if cur_path.is_file() {
                             if file_to_find.is_empty() {
-                                println!("> {}", name_str);
+                                println!("> {}", name.to_string_lossy());
                             }
-                            if name_str == file_to_find {
-                                println!("Found file at: {:?}", entry.path());
-                                return;
+                            if name.to_string_lossy().to_string() == file_to_find {
+                                println!("Found file at: {:?}", cur_path);
                             }
                         } else {
-                            self.find(&name_str, file_to_find)
+                            self.find(cur_path.to_str().unwrap(), file_to_find)
                         }
                     }
                 }
